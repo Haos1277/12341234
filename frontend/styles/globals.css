@@ -3,14 +3,16 @@
 @tailwind utilities;
 
 :root {
-  --color-primary: #9b7fa6;
-  --color-primary-light: #c4a7cb;
-  --color-bg: #fdf8f5;
-  --color-surface: #ffffff;
-  --color-text: #2d2d2d;
-  --color-muted: #8a8a8a;
-  --color-user-bubble: #ede5f0;
-  --color-assistant-bubble: #ffffff;
+  --color-bg: #080c14;
+  --color-bg2: #0d1425;
+  --color-accent: #7c6ff7;
+  --color-teal: #2dd4bf;
+  --color-text: #f1f5f9;
+  --color-muted: #94a3b8;
+  --color-surface: rgba(255, 255, 255, 0.04);
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-user-bubble: rgba(124, 111, 247, 0.18);
+  --color-assistant-bubble: rgba(255, 255, 255, 0.04);
 }
 
 * {
@@ -26,10 +28,94 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-.scrollbar-thin::-webkit-scrollbar {
-  width: 4px;
-}
+/* ── Scrollbar ── */
+.scrollbar-thin::-webkit-scrollbar { width: 4px; }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #d8c5de;
+  background: rgba(124, 111, 247, 0.35);
   border-radius: 4px;
+}
+
+/* ── Glassmorphism ── */
+.glass {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ── 3D tilt card ── */
+.tilt-card {
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+.tilt-card:hover {
+  transform: perspective(800px) rotateX(4deg) rotateY(-4deg) translateZ(8px);
+  box-shadow: 0 24px 48px -8px rgba(124, 111, 247, 0.22),
+              0 0 0 1px rgba(124, 111, 247, 0.15);
+}
+
+/* ── Gradient text ── */
+.gradient-text {
+  background: linear-gradient(135deg, #a78bfa 0%, #2dd4bf 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Shimmer button ── */
+.btn-shimmer {
+  background: linear-gradient(90deg, #7c6ff7 0%, #5b8af0 33%, #2dd4bf 66%, #7c6ff7 100%);
+  background-size: 300% 100%;
+  animation: shimmer 4s linear infinite;
+  border: none;
+  color: #fff;
+}
+.btn-shimmer:hover {
+  filter: brightness(1.12);
+}
+
+/* ── Keyframes ── */
+@keyframes shimmer {
+  0%   { background-position: 0% center; }
+  100% { background-position: 300% center; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-14px); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.45; transform: scale(1); }
+  50%       { opacity: 0.85; transform: scale(1.06); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes wave-dot {
+  0%, 60%, 100% { transform: translateY(0); }
+  30%           { transform: translateY(-8px); }
+}
+
+@keyframes blink-cursor {
+  0%, 45%   { opacity: 1; }
+  55%, 100% { opacity: 0; }
+}
+
+@keyframes particle-float {
+  0%, 100% { transform: translateY(0) translateX(0);      opacity: 0.35; }
+  40%      { transform: translateY(-18px) translateX(8px); opacity: 0.75; }
+  70%      { transform: translateY(-8px) translateX(-6px); opacity: 0.5; }
+}
+
+@keyframes msg-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes orbit-glow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(124, 111, 247, 0.6)); }
+  50%      { filter: drop-shadow(0 0 12px rgba(45, 212, 191, 0.8)); }
 }
