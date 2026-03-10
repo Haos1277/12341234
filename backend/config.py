@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     anthropic_api_key: str = ""
-    database_url: str = "postgresql+asyncpg://psybot:psybot@localhost:5432/psybot"
+    database_url: str = "sqlite+aiosqlite:///./sofia.db"
     redis_url: str = "redis://localhost:6379"
     jwt_secret: str = "change-me-in-production"
     jwt_algorithm: str = "HS256"

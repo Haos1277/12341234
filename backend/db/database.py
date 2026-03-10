@@ -3,7 +3,8 @@ from sqlalchemy.orm import sessionmaker
 
 from backend.config import settings
 
-engine = create_async_engine(settings.database_url, echo=False)
+connect_args = {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}
+engine = create_async_engine(settings.database_url, echo=False, connect_args=connect_args)
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 

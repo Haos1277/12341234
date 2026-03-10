@@ -1,35 +1,55 @@
-from datetime import datetime, timedelta
+import base64
+import hashlib
+import hmac
+import json
+import time
 from typing import Optional
 from uuid import UUID
 
-from jose import JWTError, jwt
-from passlib.context import CryptContext
+import bcrypt
 
 from backend.config import settings
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    return bcrypt.checkpw(plain.encode(), hashed.encode())
+
+
+def _b64url_encode(data: bytes) -> str:
+    return base64.urlsafe_b64encode(data).rstrip(b"=").decode()
+
+
+def _b64url_decode(data: str) -> bytes:
+    pad = 4 - len(data) % 4
+    return base64.urlsafe_b64decode(data + "=" * pad)
 
 
 def create_access_token(user_id: UUID) -> str:
-    expire = datetime.utcnow() + timedelta(minutes=settings.jwt_expire_minutes)
-    return jwt.encode(
-        {"sub": str(user_id), "exp": expire},
-        settings.jwt_secret,
-        algorithm=settings.jwt_algorithm,
-    )
+    expire = int(time.time()) + settings.jwt_expire_minutes * 60
+    header = _b64url_encode(json.dumps({"alg": "HS256", "typ": "JWT"}).encode())
+    payload = _b64url_encode(json.dumps({"sub": str(user_id), "exp": expire}).encode())
+    signing_input = f"{header}.{payload}"
+    sig = hmac.new(settings.jwt_secret.encode(), signing_input.encode(), hashlib.sha256).digest()
+    return f"{signing_input}.{_b64url_encode(sig)}"
 
 
 def decode_token(token: str) -> Optional[str]:
     try:
-        payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
-        return payload.get("sub")
-    except JWTError:
+        parts = token.split(".")
+        if len(parts) != 3:
+            return None
+        header, payload, sig = parts
+        signing_input = f"{header}.{payload}"
+        expected_sig = hmac.new(settings.jwt_secret.encode(), signing_input.encode(), hashlib.sha256).digest()
+        if not hmac.compare_digest(_b64url_decode(sig), expected_sig):
+            return None
+        data = json.loads(_b64url_decode(payload))
+        if data.get("exp", 0) < int(time.time()):
+            return None
+        return data.get("sub")
+    except Exception:
         return None
