@@ -32,6 +32,10 @@ services:
       - "8000:8000"
     env_file:
       - .env
+    environment:
+      # Override localhost URLs from .env to use Docker service names
+      - DATABASE_URL=postgresql+asyncpg://psybot:psybot@postgres:5432/psybot
+      - REDIS_URL=redis://redis:6379
     volumes:
       - ./chroma_data:/app/chroma_data
     depends_on:
@@ -39,16 +43,17 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        # API URL must be the public IP/domain — baked in at Next.js build time
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000}
     ports:
       - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
     depends_on:
       - backend
 

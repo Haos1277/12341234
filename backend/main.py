@@ -15,9 +15,15 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Sofia — AI психолог", lifespan=lifespan)
 
+_cors_origins = [
+    "http://localhost:3000",
+    "http://72.56.109.14:3000",
+    "https://yourdomain.ru",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://yourdomain.ru"],
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
